@@ -19,6 +19,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var location *time.Location
+
 func main() {
 	// flags definition
 	fs := pflag.NewFlagSet("default", pflag.ContinueOnError)
@@ -33,6 +35,7 @@ func main() {
 	fs.Float64("latitude", 0.0, "Latitude. 6 digits after dot")
 	fs.Float64("longitude", 0.0, "Latitude. 6 digits after dot")
 	fs.String("config", "", "Config path")
+	fs.String("tz", "Europe/Warsaw", "set time zone")
 
 	if err := fs.Parse(os.Args[1:]); err != nil {
 		log.Fatal().Msgf("Cannot parse command line arguments: %v", err)
@@ -48,6 +51,11 @@ func main() {
 		viper.AddConfigPath(p)
 	} else {
 		panic("config path (-config) is not specified")
+	}
+
+	var err error
+	if location, err = time.LoadLocation(viper.GetString("tz")); err != nil {
+		panic("cannot load tz data")
 	}
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
@@ -187,14 +195,12 @@ type Item struct {
 }
 
 func (i *Item) PP() string {
-	loc, _ := time.LoadLocation("Europe/Warsaw")
-
 	return fmt.Sprintf("Hurry! Take %d bags at %s for %.2f PLN\nPickup at: %s - %s\nLocation: %s\n",
 		i.Count,
 		i.PlaceName,
 		i.Item.Price.Human(),
-		i.PickupInterval.Start.In(loc).String(),
-		i.PickupInterval.End.In(loc).String(),
+		i.PickupInterval.Start.In(location).String(),
+		i.PickupInterval.End.In(location).String(),
 		i.PickupLocation,
 	)
 }
