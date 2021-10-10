@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "toogoodtogo"
+  labels:
+    app: "toogoodtogo"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "toogoodtogo"
+  template:
+    metadata:
+      labels:
+        app: "toogoodtogo"
+    spec:
+      volumes:
+        - hostPath:
+            path: /usr/share/ca-certificates/
+            type: DirectoryOrCreate
+          name: ca-real-certs
+        - hostPath:
+            path: /etc/ssl/certs
+            type: DirectoryOrCreate
+          name: ca-certs
+      containers:
+        - name: notifier
+          image: registry.val.place/toogoodtogo-alert-bot:IMAGE_TAG
+          imagePullPolicy: IfNotPresent
+          name: toogoodtogo-alert-bot
+          command: ["/app/app"]
+          envFrom:
+            - configMapRef:
+                name: "toogoodtogo-notifier-env"
+          volumeMounts:
+            - mountPath: /etc/ssl/certs
+              name: ca-certs
+              readOnly: true
+            - mountPath: /usr/share/ca-certificates/
+              name: ca-real-certs
+              readOnly: true
