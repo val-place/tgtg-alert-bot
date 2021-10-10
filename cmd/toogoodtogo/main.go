@@ -187,7 +187,7 @@ type Item struct {
 }
 
 func (i *Item) PP() string {
-	loc, _ := time.LoadLocation("Poland")
+	loc, _ := time.LoadLocation("Europe/Warsaw")
 
 	return fmt.Sprintf("Hurry! Take %d bags at %s for %.2f PLN\nPickup at: %s - %s\nLocation: %s\n",
 		i.Count,
