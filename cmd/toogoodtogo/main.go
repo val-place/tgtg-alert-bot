@@ -82,10 +82,8 @@ func main() {
 			if err != nil {
 				log.Fatal().Msgf("An error occured trying to login by email: %v", err)
 			}
-			log.Debug().Interface("Logged in as", user).Send()
+			log.Debug().Caller().Interface("Logged in as", user).Send()
 			viper.Set("user", user)
-			log.Debug().Caller().Msg("viper debug")
-			viper.Debug()
 
 			cfgPath := os.ExpandEnv(path.Join(viper.GetString("config"), "config.yaml"))
 			log.Info().Msg("Config file is not exist yet. Going to create one")
